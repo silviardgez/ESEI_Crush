@@ -7,6 +7,7 @@
 !start.
 
 /* Plans */
-
-+!start : true <- .print("hello world.").
+
++!start : true <- put(2); put(3); put(1); put(3); put(2); put(8); put(2).
+//+!start : true <- .print("hello world.").
 

@@ -8,6 +8,6 @@
 
 /* Plans */
 
-+!start : true <- put(2); put(3); put(1); put(3); put(2); put(8); put(2). //.print("hello world.").
-//+!start : true <- .print("hello world.").
+ //.print("hello world.").
++!start : true <- .print("hello world.").
 
