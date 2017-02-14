@@ -8,5 +8,7 @@ MAS conecta4 {
 
     agents: player;
 
+        judge;
+
 }
 
