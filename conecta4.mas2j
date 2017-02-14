@@ -1,0 +1,12 @@
+/* Jason Project */
+
+MAS conecta4 {
+
+    infrastructure: Centralised
+
+    environment: Tablero
+
+    agents: player;
+
+}
+
