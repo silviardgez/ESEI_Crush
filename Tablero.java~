@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class Tablero extends Environment {
 
-    public static final int GSIZE = 10; // grid size
+    public static final int GSIZE = 8; // grid size
     public static final int STEAK  = 16; // steak code in grid model
 	//Create an array of colors
 	public static final Color [] COLORS = {Color.blue,Color.red,Color.yellow,Color.green,Color.magenta,Color.cyan};
@@ -106,7 +106,7 @@ public class Tablero extends Environment {
         void put(int x) throws Exception {
             Location r1 = new Location(0,0);
 			r1.x = x - 1;
-			r1.y = GSIZE - 1;
+			r1.y = 7;
             while (hasObject(STEAK,r1)) r1.y--;
 			//if (isFree(r1.x, r1.y)==false) r1.y--;
 			//setAgPos(0, r1);
