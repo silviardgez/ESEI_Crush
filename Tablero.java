@@ -56,6 +56,7 @@ public class Tablero extends Environment {
         updatePercepts();
 
         try {
+			Thread.sleep(200);
         } catch (Exception e) {}
         informAgsEnvironmentChanged();
         return true;
@@ -141,9 +142,7 @@ public class Tablero extends Environment {
         /** draw application objects */
         @Override
         public void draw(Graphics g, int x, int y, int object) {	
-			//Color c = COLORS[rnd.nextInt(COLORS.length)];
-			System.out.println(Tablero.STEAKCOLORS[1] + " " + object);
-			
+
 			for(int i = 0; i< Tablero.STEAKCOLORS.length;i++){
 				if(Tablero.STEAKCOLORS[i] == object){
 					drawSTEAK(g, x, y, COLORS[i]);
