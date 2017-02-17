@@ -18,7 +18,8 @@ size(10).
 +!iniciarTablero : size(N) <- 
 	for (.range(X,1,N)) {
 		for (.range(Y,1,N)) {
-			put(Y);
+			.random(Z);
+			put(Y, math.floor(Z * 5));
 		}
 	}. 
 //+!start : true <- .print("hello world.").

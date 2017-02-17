@@ -15,7 +15,10 @@ import java.util.logging.Logger;
 public class Tablero extends Environment {
 
     public static final int GSIZE = 10; // grid size
-    public static final int STEAK  = 16; // steak code in grid model
+
+	//Steak codes in grid model
+	public static final int[] STEAKCOLORS = {16,32,64,128,256,512};
+	
 	//Create an array of colors
 	public static final Color [] COLORS = {Color.blue,Color.red,Color.yellow,Color.green,Color.magenta,Color.cyan};
 
@@ -41,7 +44,8 @@ public class Tablero extends Environment {
         try {
             if (action.getFunctor().equals("put")) {
                 int x = (int)((NumberTerm)action.getTerm(0)).solve();
-                model.put(x);
+				int y = (int)((NumberTerm)action.getTerm(1)).solve();
+                model.put(x,y);
             } else {
                 return false;
             }
@@ -52,7 +56,6 @@ public class Tablero extends Environment {
         updatePercepts();
 
         try {
-            Thread.sleep(200);
         } catch (Exception e) {}
         informAgsEnvironmentChanged();
         return true;
@@ -103,14 +106,23 @@ public class Tablero extends Environment {
             //setAgPos(1, getAgPos(1)); // just to draw it in the view
         }
 
-        void put(int x) throws Exception {
-            Location r1 = new Location(0,0);
+        void put(int x, int c) throws Exception {
+			Location r1 = new Location(0,0);
 			r1.x = x - 1;
 			r1.y = GSIZE - 1;
-            while (hasObject(STEAK,r1)) r1.y--;
+			
+			for(int i=0;i<STEAKCOLORS.length;i++){
+				while (hasObject(STEAKCOLORS[i],r1)) {
+					r1.y--;
+					i=0;
+				}	
+			}
+			
 			//if (isFree(r1.x, r1.y)==false) r1.y--;
 			//setAgPos(0, r1);
-			add(STEAK, r1);
+			
+			add(STEAKCOLORS[c],r1);
+
             //setAgPos(1, getAgPos(1)); // just to draw it in the view
         }
         
@@ -125,17 +137,18 @@ public class Tablero extends Environment {
             //repaint();
         }
 		
-		//Create random number to show colors
-		Random rnd = new Random();
 		
         /** draw application objects */
         @Override
-        public void draw(Graphics g, int x, int y, int object) {
-			//Select a random color
-			Color c = COLORS[rnd.nextInt(COLORS.length)];
-            switch (object) {
-                case Tablero.STEAK: drawSTEAK(g, x, y, c);  break;
-            }
+        public void draw(Graphics g, int x, int y, int object) {	
+			//Color c = COLORS[rnd.nextInt(COLORS.length)];
+			System.out.println(Tablero.STEAKCOLORS[1] + " " + object);
+			
+			for(int i = 0; i< Tablero.STEAKCOLORS.length;i++){
+				if(Tablero.STEAKCOLORS[i] == object){
+					drawSTEAK(g, x, y, COLORS[i]);
+				}
+			}
         }
 
         @Override
