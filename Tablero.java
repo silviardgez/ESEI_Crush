@@ -17,7 +17,7 @@ public class Tablero extends Environment {
     public static final int GSIZE = 10; // grid size
 
 	//Steak codes in grid model
-	public static final int[] STEAKCOLORS = {16,32,64,128,256,512};
+	public static final int[] STEAKCOLORS = {32,64,128,256,512,1024};
 	
 	//Create an array of colors
 	public static final Color [] COLORS = {Color.blue,Color.red,Color.yellow,Color.green,Color.magenta,Color.cyan};
@@ -44,19 +44,28 @@ public class Tablero extends Environment {
         try {
             if (action.getFunctor().equals("put")) {
                 int x = (int)((NumberTerm)action.getTerm(0)).solve();
-				int y = (int)((NumberTerm)action.getTerm(1)).solve();
-                model.put(x,y);
+				int c = (int)((NumberTerm)action.getTerm(1)).solve();
+                model.put(x,c);
+			} else if (action.getFunctor().equals("intercambiarColores")) {
+				int c1 = (int)((NumberTerm)action.getTerm(0)).solve();
+				int x1 = (int)((NumberTerm)action.getTerm(1)).solve();
+				int y1 = (int)((NumberTerm)action.getTerm(2)).solve();
+				int c2 = (int)((NumberTerm)action.getTerm(3)).solve();
+				int x2 = (int)((NumberTerm)action.getTerm(4)).solve();
+				int y2 = (int)((NumberTerm)action.getTerm(5)).solve();
+				System.out.println(c1);
+				model.intercambiarColores(c1,x1,y1,c2,x2,y2);
+				
             } else {
                 return false;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        updatePercepts();
 
         try {
-			Thread.sleep(200);
+			Thread.sleep(10);
+			
         } catch (Exception e) {}
         informAgsEnvironmentChanged();
         return true;
@@ -107,6 +116,28 @@ public class Tablero extends Environment {
             //setAgPos(1, getAgPos(1)); // just to draw it in the view
         }
 
+		public String getNameColor(int x){
+			if (x==16) {
+				return "Azul";
+			};
+			if (x==32) {
+				return "Rojo";
+			};
+			if (x==64) {
+				return "Amarillo";
+			};
+			if (x==128) {
+				return "Verde";
+			};
+			if (x==256) {
+				return "Magenta";
+			};
+			if (x==512) {
+				return "Cyan";
+			}
+			return "";
+		}
+		
         void put(int x, int c) throws Exception {
 			Location r1 = new Location(0,0);
 			r1.x = x - 1;
@@ -123,9 +154,32 @@ public class Tablero extends Environment {
 			//setAgPos(0, r1);
 			
 			add(STEAKCOLORS[c],r1);
+			addPercept(Literal.parseLiteral("steak(" + STEAKCOLORS[c] + "," + r1.x + "," + r1.y + ")"));
+			System.out.println("Estoy añadiendo steak(" + STEAKCOLORS[c] + "," + r1.x + "," + r1.y + ")");
 
             //setAgPos(1, getAgPos(1)); // just to draw it in the view
         }
+		
+		
+		
+		void intercambiarColores(int color1, int x1, int y1, int color2, int x2, int y2)  throws Exception {
+			Location r3 = new Location(x1+2,y2);
+			Location r2 = new Location(x2+2,y2);
+			
+			add(color2,r3);
+			//System.out.println("steak(" + color2 + "," + r1.x + "," + r1.y + ")");
+			add(color1,r2);
+			System.out.println("steak(" + color1 + "," + r2.x + "," + r2.y + ")");
+			
+			//Remove old percepts
+			//removePercept(Literal.parseLiteral("steak(" + color1 + "," + x1 + "," + y1 + ")"));
+			//removePercept(Literal.parseLiteral("steak(" + color2 + "," + x2 + "," + y2 + ")"));
+			
+			//Add new percepts
+			addPercept(Literal.parseLiteral("steak(" + color2 + "," + x1 + "," + y1 + ")"));
+			addPercept(Literal.parseLiteral("steak(" + color1 + "," + x2 + "," + y2 + ")"));
+
+		}
         
     }
     

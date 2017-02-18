@@ -4,11 +4,13 @@
 
 /* Initial goals */
 
-!start.
 
 /* Plans */
 
  //.print("hello world."). 
  
-+!start : true <- .print("hello world.").
++empezar <- !start.
+
++!start : true <- .send(judge,tell,intercambiar(2,9,3,9));
+					.print("cambiamos 0,9 por 1,9s").
 
