@@ -53,7 +53,6 @@ public class Tablero extends Environment {
 				int c2 = (int)((NumberTerm)action.getTerm(3)).solve();
 				int x2 = (int)((NumberTerm)action.getTerm(4)).solve();
 				int y2 = (int)((NumberTerm)action.getTerm(5)).solve();
-				System.out.println(c1);
 				model.intercambiarColores(c1,x1,y1,c2,x2,y2);
 				
             } else {
