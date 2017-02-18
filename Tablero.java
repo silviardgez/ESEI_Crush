@@ -63,7 +63,7 @@ public class Tablero extends Environment {
         }
 
         try {
-			Thread.sleep(10);
+			Thread.sleep(100);
 			
         } catch (Exception e) {}
         informAgsEnvironmentChanged();

@@ -4,10 +4,10 @@
 /* Initial beliefs and rules */
 size(10).
 
-contiguas(X,Y1,X,Y2) :- size(N) & Y2< N-1 & Y1 = Y2+1.
-contiguas(X,Y1,X,Y2) :- Y2 > 1 & Y1 = Y2-1.
-contiguas(X1,Y,X2,Y) :- size(N) & X2< N-1 & X1 = X2+1.
-contiguas(X1,Y,X2,Y) :-  X1 = X2+1.
+contiguas(X,Y1,X,Y2) :- size(N) & Y2=Y1+1 & Y2<N-1.
+contiguas(X,Y1,X,Y2) :- size(N) & Y2=Y1-1 & Y1<N-1 & Y1>0.
+contiguas(X1,Y,X2,Y) :- size(N) & X2=X1+1 & X2<N-1.
+contiguas(X1,Y,X2,Y) :- size(N) & X2=X1-1 & X1<N-1 & X1>0.
 
 /* Initial goals */
 
@@ -31,14 +31,15 @@ contiguas(X1,Y,X2,Y) :-  X1 = X2+1.
 			put(Y, math.floor(Z * 5));
 		}
 	}. 
-//& contiguas(X1,Y1,X2,Y2)
-+intercambiar(X1,Y1,X2,Y2)[source(Source)]: steak(C1,X1,Y1) & steak(C2,X2,Y2) & not C1 == C2 <-
+//
++intercambiar(X1,Y1,X2,Y2)[source(Source)]: steak(C1,X1,Y1) & steak(C2,X2,Y2) & contiguas(X1,Y1,X2,Y2) & not C1 == C2 <-
 	.print(Source, " va a mover ", X1,",",Y1, " por ", X2,",",Y2, ".");
 	.wait(1000);
 	intercambiarColores(C1,X1,Y1,C2,X2,Y2);
-	.wait(3000).
+	.wait(1000).
 
 +intercambiar(X1,Y1,X2,Y2)[source(Source)] <-
-	.print(Source, " intenta realizar movimiento incorrecto.").
+	.print(Source, " intenta realizar movimiento incorrecto ",X1,",",Y1, " por ", X2,",",Y2, ".");
+	.wait(1000).
 
 
