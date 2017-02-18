@@ -115,28 +115,6 @@ public class Tablero extends Environment {
             setAgPos(0, r1);
             //setAgPos(1, getAgPos(1)); // just to draw it in the view
         }
-
-		public String getNameColor(int x){
-			if (x==16) {
-				return "Azul";
-			};
-			if (x==32) {
-				return "Rojo";
-			};
-			if (x==64) {
-				return "Amarillo";
-			};
-			if (x==128) {
-				return "Verde";
-			};
-			if (x==256) {
-				return "Magenta";
-			};
-			if (x==512) {
-				return "Cyan";
-			}
-			return "";
-		}
 		
         void put(int x, int c) throws Exception {
 			Location r1 = new Location(0,0);
@@ -163,17 +141,13 @@ public class Tablero extends Environment {
 		
 		
 		void intercambiarColores(int color1, int x1, int y1, int color2, int x2, int y2)  throws Exception {
-			Location r3 = new Location(x1+2,y2);
-			Location r2 = new Location(x2+2,y2);
-			
-			add(color2,r3);
-			//System.out.println("steak(" + color2 + "," + r1.x + "," + r1.y + ")");
-			add(color1,r2);
-			System.out.println("steak(" + color1 + "," + r2.x + "," + r2.y + ")");
+		
+			set(color2, x1, y1);
+			set(color1, x2, y2);
 			
 			//Remove old percepts
-			//removePercept(Literal.parseLiteral("steak(" + color1 + "," + x1 + "," + y1 + ")"));
-			//removePercept(Literal.parseLiteral("steak(" + color2 + "," + x2 + "," + y2 + ")"));
+			removePercept(Literal.parseLiteral("steak(" + color1 + "," + x1 + "," + y1 + ")"));
+			removePercept(Literal.parseLiteral("steak(" + color2 + "," + x2 + "," + y2 + ")"));
 			
 			//Add new percepts
 			addPercept(Literal.parseLiteral("steak(" + color2 + "," + x1 + "," + y1 + ")"));
