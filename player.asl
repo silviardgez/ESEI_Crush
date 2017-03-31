@@ -6,7 +6,6 @@
 iguales(X1,Y1,X2,Y2) :- steak(Color, X1, Y1)& steak(Color, X2, Y2). //dos fichas son iguales si tienen el mismo color
 
 
-
 /* Initial goals */
 
 //!start.
@@ -14,43 +13,128 @@ iguales(X1,Y1,X2,Y2) :- steak(Color, X1, Y1)& steak(Color, X2, Y2). //dos fichas
 
 
 /* Plans */
++totalPoints(Total)[source(Source)]<- if(Total>100){+ganador}. //el jugador comprueba si ya ha conseguido los 100 puntos necesarios para superar el nivel
 
-+canExchange <- !start.
++canExchange <- !start. //cuando el juez le permite intercambiar, comienza
 
-+!start : sizeof(T) <-for(.range(X, 0, T)){
-							for(.range(Y, 0, T)){ //Solo solicita exchange fichas que produzcan una agrupación de 3 con los movimientos permitidos en el candy crush
-							if(not(stop)){
-								if(not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-2,Y)& iguales(X,Y,X-3,Y)){
-								.print("Solicito exchange ficha en (",X-1,",",Y,") por ficha en (",X,",",Y,")");
-								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(3000);
-								  
++!start : sizeof(T)  <- while(not(fin) & not(ganador) ){ for(.range(X, 0, T)){for(.range(Y, 0, T)){ //mientras no se le hayan acabado los movimientos o haya ganado, recorre el tablero pidiendo intercambios posibles
+
+							 //Solo solicita  intercambios de piezas que produzca la agrupación de cuadrado y de tres (todos los patrones se pueden conseguir con estos intercambios)
+						if(not(para)){
+						
+								if(not(invalido(X,Y,X+1,Y)) & not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+2,Y)& iguales(X,Y,X+1,Y+1)& iguales(X,Y,X+2,Y+1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(6000);
+								}
+								if(not(invalido(X,Y,X,Y+1)) & not(iguales(X,Y,X,Y+1)) & iguales(X,Y,X+1,Y+1)& iguales(X,Y,X,Y+2)& iguales(X,Y,X+1,Y+2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y+1,")");
+								.send(judge,tell,exchange(X,Y,X,Y+1));.wait(6000);
+								}
+								if(not(invalido(X,Y,X,Y+1)) & not(iguales(X,Y,X,Y+1)) & iguales(X,Y,X-1,Y+1)& iguales(X,Y,X-1,Y+2)& iguales(X,Y,X,Y+2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y+1,")");
+								.send(judge,tell,exchange(X,Y,X,Y+1));.wait(6000);
+								}
+								if(not(invalido(X,Y,X-1,Y)) & not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-2,Y)& iguales(X,Y,X-1,Y+1)& iguales(X,Y,X-2,Y+1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X-1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(6000);
+								}
+								if(not(invalido(X,Y,X-1,Y)) & not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-1,Y-1)& iguales(X,Y,X-2,Y-1)& iguales(X,Y,X-2,Y)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X-1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(6000);
+								}
+								if(not(invalido(X,Y,X,Y-1)) & not(iguales(X,Y,X,Y-1)) & iguales(X,Y,X,Y-2)& iguales(X,Y,X-1,Y-1)& iguales(X,Y,X-1,Y-2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y-1,")");
+								.send(judge,tell,exchange(X,Y,X,Y-1));.wait(6000);
+								}
+								if(not(invalido(X,Y,X+1,Y)) & not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+1,Y-1)& iguales(X,Y,X+2,Y-1)& iguales(X,Y,X+2,Y)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(6000);
+								}
+								if(not(invalido(X,Y,X,Y+1)) & not(iguales(X,Y,X,Y+1)) & iguales(X,Y,X,Y+2)& iguales(X,Y,X+1,Y-1)& iguales(X,Y,X+1,Y-2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y+1,")");
+								.send(judge,tell,exchange(X,Y,X,Y+1));.wait(6000);
 								}
 								
-								if(not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+1,Y+1)& iguales(X,Y,X+1,Y+2)){
-								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
-								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(3000);
-								 
-								}}
 							
-					}}.
-	/* Igual este mecanismo de control sobre las piezas no es muy adecuado para el tablero elegido */
-
-+tryAgain(X,Y)<- ?sizeof(T);
-	for(.range(X+1, 0, T)){
-							for(.range(Y, 0, T)){ //Solo solicita exchange fichas que produzcan una agrupación de 3 con los movimientos permitidos en el candy crush
-							if(not(stop)){
-								if(not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-2,Y)& iguales(X,Y,X-3,Y)){
-								.print("Solicito exchange ficha en (",X-1,",",Y,") por ficha en (",X,",",Y,")");
-								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(3000);
-								  
+								if(not(invalido(X,Y,X+1,Y)) & not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+2,Y)& iguales(X,Y,X+3,Y)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(6000); //Espera  entre movimientos para facilitar visualización
+								}
+								if(not(invalido(X,Y,X,Y+1)) & not(iguales(X,Y,X,Y+1)) & iguales(X,Y,X,Y+2)& iguales(X,Y,X,Y+3)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y+1,")");	
+								.send(judge,tell,exchange(X,Y,X,Y+1));.wait(6000);
+								}
+								if(not(invalido(X,Y,X-1,Y)) & not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-2,Y)& iguales(X,Y,X-3,Y)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X-1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(6000);
+								}
+								if(not(invalido(X,Y,X,Y-1)) & not(iguales(X,Y,X,Y-1)) & iguales(X,Y,X,Y-2)& iguales(X,Y,X,Y-3)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y-1,")");	
+								.send(judge,tell,exchange(X,Y,X,Y-1));.wait(6000);}
+								
+								if(not(invalido(X,Y,X+1,Y)) & not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+1,Y+1)& iguales(X,Y,X+1,Y+2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(6000);
+								}
+									if(not(invalido(X,Y,X+1,Y)) & not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+1,Y-1)& iguales(X,Y,X+1,Y-2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(6000);
 								}
 								
-								if(not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+1,Y+1)& iguales(X,Y,X+1,Y+2)){
+								if(not(invalido(X,Y,X-1,Y)) & not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-1,Y+1)& iguales(X,Y,X-1,Y+2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X-1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(6000);
+								}
+									if(not(invalido(X,Y,X-1,Y)) & not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-1,Y-1)& iguales(X,Y,X-1,Y-2)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X-1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(6000);
+								}
+									if(not(invalido(X,Y,X,Y+1)) & not(iguales(X,Y,X,Y+1)) & iguales(X,Y,X+1,Y+1)& iguales(X,Y,X+2,Y+1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y+1,")");
+								.send(judge,tell,exchange(X,Y,X,Y+1));.wait(6000);
+								}
+									if(not(invalido(X,Y,X,Y+1)) & not(iguales(X,Y,X,Y+1)) & iguales(X,Y,X-1,Y+1)& iguales(X,Y,X-2,Y+1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y+1,")");
+								.send(judge,tell,exchange(X,Y,X,Y+1));.wait(6000);
+								}
+								
+								if(not(invalido(X,Y,X,Y-1)) & not(iguales(X,Y,X,Y-1)) & iguales(X,Y,X+1,Y-1)& iguales(X,Y,X+2,Y-1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y-1,")");
+								.send(judge,tell,exchange(X,Y,X,Y-1));.wait(6000);
+								}
+									if(not(invalido(X,Y,X,Y-1)) & not(iguales(X,Y,X,Y-1)) & iguales(X,Y,X-1,Y-1)& iguales(X,Y,X-2,Y-1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y-1,")");
+								.send(judge,tell,exchange(X,Y,X,Y-1));.wait(6000);
+								}
+								if(not(invalido(X,Y,X,Y+1)) & not(iguales(X,Y,X,Y+1)) & iguales(X,Y,X-1,Y+1)& iguales(X,Y,X+1,Y+1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y+1,")");
+								.send(judge,tell,exchange(X,Y,X,Y+1));.wait(6000);
+								}
+								if(not(invalido(X,Y,X,Y-1)) & not(iguales(X,Y,X,Y-1)) & iguales(X,Y,X-1,Y-1)& iguales(X,Y,X+1,Y-1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X,",",Y-1,")");
+								.send(judge,tell,exchange(X,Y,X,Y-1));.wait(6000);
+								}
+								if(not(invalido(X,Y,X-1,Y)) & not(iguales(X,Y,X-1,Y)) & iguales(X,Y,X-1,Y+1)& iguales(X,Y,X-1,Y-1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X-1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X-1,Y));.wait(6000);
+								}
+								if(not(invalido(X,Y,X+1,Y)) & not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+1,Y+1)& iguales(X,Y,X+1,Y-1)){
 								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
-								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(3000);
-								 
-								}}
+								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(6000);
+								} 
+								if(not(invalido(X,Y,X+1,Y)) & not(iguales(X,Y,X+1,Y)) & iguales(X,Y,X+1,Y+1)& iguales(X,Y,X+1,Y-1)){
+								.print("Solicito exchange ficha en (",X,",",Y,") por ficha en (",X+1,",",Y,")");
+								.send(judge,tell,exchange(X,Y,X+1,Y));.wait(6000);
+								}
+								
+									}
+									
+								
+								
 							
-					}}.
+					}}}; if(ganador){.print("NIVEL SUPERADO: HE CONSEGUIDO 100 PUNTOS! :D");} else { .print("Se me han acabado los movimientos :(")}.
 
-+pos(Ag,X,Y)[source(S)] <- -pos(Ag,X,Y)[source(S)]. 
+
++tryAgain (X1,Y1,X2,Y2)<-+invalido(X1,Y1,X2,Y2);!start. //almacena cuales son los movimientos invalidos para no repetirlos
+
+
