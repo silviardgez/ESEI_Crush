@@ -2,11 +2,10 @@
 
 /* Initial beliefs and rules */
 
-movs(20). //NÃºmero mÃ¡ximo de movimientos permitidos
+movs(20). //Número máximo de movimientos permitidos
 totalPoints(0). //Puntos acumulados
 pointOnMov(0). //Puntos asociados al movimiento
 x(0).
-
 y(9).
 
 //mapa(L) :- mapa1(L) | mapa2(L). //Descomentar para hacer uso de los mapas
@@ -54,7 +53,7 @@ contiguas(X1,X2,Y,Y) :- X2  > X1 & sizeof(N) & 0 <= Y & Y < N+1 & X2 < N+1 & X2 
 contiguas(X1,X2,Y,Y) :-  X2  < X1 & X2 >= 0 & 0 <= Y & Y < N+1 & X2 = X1-1.
 contiguas(X1,X2,Y,Y) :- X2  > X1 & X1 >= 0 & 0 <= Y & Y < N+1 & X1 = X2-1.
 
-freeGroup(X,Y,C) :- //Un grupo estÃ¡ libre si no se da ninguna de las agrupaciones
+freeGroup(X,Y,C) :- //Un grupo está libre si no se da ninguna de las agrupaciones
 	not groupFileA(X,Y,C) & not groupFileB(X,Y,C) & not groupFileE(X,Y,C) & not groupColumnC(X,Y,C) & not groupColumnD(X,Y,C) & not groupColumnF(X,Y,C)
 	& not groupColumn4C(X,Y,C) & not groupColumn4C(X,Y,C) & not groupFile4A(X,Y,C) & not groupFile4B(X,Y,C) & not groupFile5(X,Y,C) & not groupColumn5(X,Y,C)
 	& not groupCuadradoA(X,Y,C) & not groupCuadradoB(X,Y,C) & not groupCuadradoC(X,Y,C) & not groupCuadradoD(X,Y,C) & not groupT(X,Y,C) & not groupT2(X,Y,C)
@@ -154,7 +153,7 @@ groupFileA(X,Y,C) :- // OO_
 
 +!start : true <- 
 	
-	!iniciarTablero; //rellena el tablero, coloca obstÃ¡culos y especiales
+	!iniciarTablero; //rellena el tablero, coloca obstáculos y especiales
 	
 	.all_names(L);
 	.wait(100);
@@ -278,13 +277,18 @@ groupFileA(X,Y,C) :- // OO_
 	
 +!colaterales(X2,Y2): sizeof(N) <- //Comprueba si se forman agrupamientos colaterales en la columna en la que se han hecho los cambios
 		for (.range(Y,Y2,0,-1)) { //busca desde la fila del cambio hasta 0
+		
+		if(obstacle(X2,Y)){
+	
+		!colaterales(X2+1,Y);}
+			else{
 			.print("BUSCANDO AGRUPAMIENTOS COLATERALES EN  : (",X2,",",Y,")");
 			if(steak(C,X2,Y)){
 			?steak(C,X2,Y);
-			.wait(11);
+			.wait(15);
 			-+detect(X2,Y,C);} //manda buscar las agrupaciones
 			
-		};
+		}};
 		
 	.
 	
@@ -377,7 +381,7 @@ groupFileA(X,Y,C) :- // OO_
 	
 	//....BORRAMOS Y COLOCAMOS ESPECIALES ....
 	
-	//Grupos de 5
+
 	+detectGroups5A(X2,Y2,C) : 	groupFile5(X2,Y2,C)  <-
 	
 	.print("BORRANDO 5 EN HORIZONTAL");!putCt(X2,Y2)      ;-+cleanSteaks(X2+2,Y2);-+cleanSteaks(X2+1,Y2);-+cleanSteaks(X2-1,Y2);-+cleanSteaks(X2-2,Y2);!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
@@ -506,7 +510,7 @@ groupFileA(X,Y,C) :- // OO_
 
 
 //Investiga la posiciÃ³n X2,Y2, primero sumando los puntos asociados a los patrones y despuÃ©s realizando solo el borrado correspondiente a la mayor puntuaciÃ³n
-+detect(X2,Y2,C)<--+puntuaGroups5A(X2,Y2,C);-+puntuaGroups5B(X2,Y2,C);-+puntuaGroupsCuadrA(X2,Y2,C);-+puntuaGroupsCuadrB(X2,Y2,C);-+puntuaGroupsCuadrC(X2,Y2,C);-+puntuaGroupsCuadrD(X2,Y2,C); -+puntuaGroupsT(X2,Y2,C);-+puntuaGroupsT2(X2,Y2,C); -+puntuaGroupsT3(X2,Y2,C);-+puntuaGroupsT4(X2,Y2,C);-+puntuaGroups4A(X2,Y2,C);-+puntuaGroups4B(X2,Y2,C);-+puntuaGroups4C(X2,Y2,C); -+puntuaGroups4D(X2,Y2,C);if(not(borrado)){-+detectGroups5A(X2,Y2,C)};if(not(borrado)){-+detectGroups5B(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrA(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrB(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrC(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrD(X2,Y2,C)}; if(not(borrado)){-+detectGroupsT(X2,Y2,C)};if(not(borrado)){-+detectGroupsT2(X2,Y2,C)}; if(not(borrado)){-+detectGroupsT3(X2,Y2,C)};if(not(borrado)){-+detectGroupsT4(X2,Y2,C)};if(not(borrado)){-+detectGroups4A(X2,Y2,C)};if(not(borrado)){-+detectGroups4B(X2,Y2,C)};if(not(borrado)){-+detectGroups4C(X2,Y2,C)}; if(not(borrado)){-+detectGroups4D(X2,Y2,C)};if(not(borrado)){-+detectGroupsA(X2,Y2,C)};if(not(borrado)){-+detectGroupsB(X2,Y2,C)};if(not(borrado)){-+detectGroupsC(X2,Y2,C)};if(not(borrado)){-+detectGroupsD(X2,Y2,C)};if(not(borrado)){-+detectGroupsE(X2,Y2,C)};if(not(borrado)){-+detectGroupsF(X2,Y2,C)};if(borrado){-borrado};.wait(400).
++detect(X2,Y2,C)<--+puntuaGroups5A(X2,Y2,C);-+puntuaGroups5B(X2,Y2,C);-+puntuaGroupsCuadrA(X2,Y2,C);-+puntuaGroupsCuadrB(X2,Y2,C);-+puntuaGroupsCuadrC(X2,Y2,C);-+puntuaGroupsCuadrD(X2,Y2,C); -+puntuaGroupsT(X2,Y2,C);-+puntuaGroupsT2(X2,Y2,C); -+puntuaGroupsT3(X2,Y2,C);-+puntuaGroupsT4(X2,Y2,C);-+puntuaGroups4A(X2,Y2,C);-+puntuaGroups4B(X2,Y2,C);-+puntuaGroups4C(X2,Y2,C); -+puntuaGroups4D(X2,Y2,C);if(not(borrado)){-+detectGroups5A(X2,Y2,C)};if(not(borrado)){-+detectGroups5B(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrA(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrB(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrC(X2,Y2,C)};if(not(borrado)){-+detectGroupsCuadrD(X2,Y2,C)}; if(not(borrado)){-+detectGroupsT(X2,Y2,C)};if(not(borrado)){-+detectGroupsT2(X2,Y2,C)}; if(not(borrado)){-+detectGroupsT3(X2,Y2,C)};if(not(borrado)){-+detectGroupsT4(X2,Y2,C)};if(not(borrado)){-+detectGroups4A(X2,Y2,C)};if(not(borrado)){-+detectGroups4B(X2,Y2,C)};if(not(borrado)){-+detectGroups4C(X2,Y2,C)}; if(not(borrado)){-+detectGroups4D(X2,Y2,C)};if(not(borrado)){-+detectGroupsA(X2,Y2,C)};if(not(borrado)){-+detectGroupsB(X2,Y2,C)};if(not(borrado)){-+detectGroupsC(X2,Y2,C)};if(not(borrado)){-+detectGroupsD(X2,Y2,C)};if(not(borrado)){-+detectGroupsE(X2,Y2,C)};if(not(borrado)){-+detectGroupsF(X2,Y2,C)};if(borrado){-borrado};.wait(400); -detect(X2,Y2,C).
 
 
 
@@ -555,7 +559,7 @@ groupFileA(X,Y,C) :- // OO_
 				 
 				 } 
 			else {if(steak(Q,X,Y-1)& not(obstacle(Q,X,Y-1))&(moveDown(X,S))){
-				.print("estÃ¡ cayendo la columna: ", X);
+				.print("está cayendo la columna: ", X);
 				
 				 ?steak(Q,X,Y-1);
 			
@@ -598,7 +602,7 @@ groupFileA(X,Y,C) :- // OO_
 	else {+trampa(Ag)}.
 	
 +accionIlegal(Ag) : not amarilla(N) <- +amarilla(1). // Controla si algun player intenta realizar un movimiento ilegal
-+cleanSteaks(X,Y): steak(C,X,Y)<- ?steak(C,X,Y);  //realizamos el borrado de las piezas con la correspondiente caÃ­da
++cleanSteaks(X,Y): steak(C,X,Y)<- ?steak(C,X,Y);  //realizamos el borrado de las piezas con la correspondiente caída
 	if(ip(X,Y,C)){ //puntuamos en caso de borrar especiales
 	-ip(X,Y,C);
 	.print("He borrado un IP (+2)");
@@ -634,7 +638,7 @@ groupFileA(X,Y,C) :- // OO_
 	
 +exchange(X1,Y1,X2,Y2)[source(Source)]: //realiza el intercambio entre dos fichas
 	steak(C1,X1,Y1) & steak(C2,X2,Y2) & contiguas(X1,X2,Y1,Y2) & not C1 == C2 & not(obstacle(X1,Y1)) & not (obstacle(X2,Y2)) & ( not (freeGroup(X1,Y1,C2)) | not (freeGroup(X2,Y2,C1))  )
-<- //manda parar al jugador para que no pida mÃ¡s movimientos hasta que termine
+<- //manda parar al jugador para que no pida más movimientos hasta que termine
 	.send(player,tell,para);-exchange(X1,Y1,X2,Y2); deleteSteak (C1, X1, Y1); -steak(C1,X1,Y1);.send(player,untell,steak(C1,X1,Y1)) ;deleteSteak (C2, X2, Y2); .send(player,untell,steak(C2,X2,Y2));-steak(C2,X2,Y2); put(X1,Y1,C2,0); put(X2,Y2,C1,0);
  if(ct(X1,Y1,C1)){
 				  -ct(X1,Y1);
@@ -679,8 +683,8 @@ groupFileA(X,Y,C) :- // OO_
 				  !putCo(X1,Y1);
 				  .send(player,untell,ct(X2,Y2));
 				  };.print("Hecho el intercambio.");!actualizeMovs
-;-+detect(X2,Y2,C1);.wait(300); -+detect(X1,Y1,C2) 
-;.send(player,untell,para); 
+;-+detect(X2,Y2,C1);.wait(100); -+detect(X1,Y1,C2) 
+;while(detect(X,Y,K)){.wait(10)};.send(player,untell,para); 
 .
 
 
