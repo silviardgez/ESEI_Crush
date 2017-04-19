@@ -7,6 +7,7 @@ totalPoints(0). //Puntos acumulados
 pointOnMov(0). //Puntos asociados al movimiento
 x(0).
 y(9).
+level(0).
 
 //mapa(L) :- mapa1(L) | mapa2(L). //Descomentar para hacer uso de los mapas
 
@@ -33,9 +34,6 @@ mapa2([[ 16, 32, 16, 32, 64, 64, 16, 32,512,256],
 	   [ 64, 256, 32,128, 32, 16,512,256,128, 64],
 	   [256,256,256,128, 64,512,512, 64, 32, 64]]).
 
-	   
-//semilla(37).
-//:- .add_plan({+!colocame: true <-.print("Caca de la vaca D---------------------------------------------------")}).
 
 color(0,16).
 color(N,C) :- color(N-1,C1) & C = C1*2. //Los colores son multiplos de 16
@@ -153,13 +151,18 @@ groupFileA(X,Y,C) :- // OO_
 
 +!start : true <- 
 	
+	?level(N);
+	-+level(N+1);
+	?level(A);
+	.print("-------- NIVEL ", A ,"--------");
 	!iniciarTablero; //rellena el tablero, coloca obst�culos y especiales
 	
 	.all_names(L);
 	.wait(100);
-		
+	
 	if (.member(player,L)){ //comprueba que el player sea un miembro de la partida
-		.send(player,tell,canExchange);}
+		.send(player,tell,canExchange);
+		.send(player,untell,canExchange)}
 	else {
 		.print("El agente player no existe mas.");
 	}.
@@ -184,14 +187,18 @@ groupFileA(X,Y,C) :- // OO_
 	!recorreMapa(Mapa).
 	
 +!iniciarTablero : not mapa(Mapa) & sizeof(N) <- //iniciacion con piezas al azar
-	!putObstacle(1,7); //colocamos los obstaculos
-	!putObstacle(7,3);
-	!putObstacle(4,1);
-	!putObstacle(4,6);
-	!putObstacle(2,0);
+	?level(L);
+	if(L>1){
+		for(.range(K,0,5)){
+			.random(G);
+			.random(P);
+			if(not(obstacle((math.floor(G*N))+1,math.floor(P*N))) & not(obstacle(math.floor(G*N),math.floor((P*N))+1)) & not(obstacle(math.floor(G*N)-1,math.floor(P*N))) & not(obstacle(math.floor(G*N),math.floor(P*N)-1))){
+				!putObstacle(math.floor(G*N),math.floor(P*N));
+			} 
+	}
+	};
+
 	
-
-
 	
 	for (.range(Y,N,0,-1)) {
 		for (.range(X,0,N)) {
@@ -200,19 +207,37 @@ groupFileA(X,Y,C) :- // OO_
 			if (freeGroup(X,Y,C)) {
 				.print("Pongo ficha de color: ",C);
 				put(X,Y,C,0);
+				.random(M);
+				R = math.floor(M*N*2);
+				if(R == 2){
+					.random(H);
+					J = math.floor(H*3);
+					if(J == 0){
+						!putIp(X,Y);
+					}
+					if(J == 1){
+						!putCt(X,Y);
+					}
+					if(J == 2){
+						!putCo(X,Y);
+					}
+					if(J == 3){
+						!putGs(X,Y);
+					}
+				}
 			} else { //en caso de que s encuentren agrupaciones iniciales, se cambia el color de la pieza
-			    .print("Detectada agrupación de color: ",C," ......................");
+			    .print("Detectada agrupaci�n de color: ",C," ......................");
 				if (C<512) {C1 = C*2;} else {C1 = 16;};
 				
 				.print("Pongo ficha de color: ",C1);
 				put(X,Y,C1,0);
 			}
 		}
-	};
-	
-	!initSpecials.
+	}.
 
-+!initSpecials : sizeof(N) <- //Ponemos las piezas especiales
+	//!initSpecials.
+
+/*+!initSpecials : sizeof(N) <- //Ponemos las piezas especiales
 
 	
 	!putIp(2,N-6); 
@@ -220,7 +245,19 @@ groupFileA(X,Y,C) :- // OO_
 	!putCo(4,N-4);
 	!putGs(N-6,3);
 	
-	.print("Se acabo la inicialización").
+	.print("Se acabo la inicializaci�n").*/
+	
++cleanTablero [source(self)] : sizeof(N) <- 
+	for (.range(Y,N,0,-1)) {
+		for (.range(X,0,N)) {
+			if (obstacle(X,Y)){
+				deleteSteak(4,X,Y);
+			} else {
+			?steak(C,X,Y);
+ 			deleteSteak(C,X,Y);
+			}
+ 		}
+	}.
 
 +!putGs(X,Y) : steak(C,X,Y) <- //Coloca GS en X,Y
 	+gs(X,Y,C);
@@ -384,13 +421,17 @@ groupFileA(X,Y,C) :- // OO_
 
 	+detectGroups5A(X2,Y2,C) : 	groupFile5(X2,Y2,C)  <-
 	
-	.print("BORRANDO 5 EN HORIZONTAL");!putCt(X2,Y2)      ;-+cleanSteaks(X2+2,Y2);-+cleanSteaks(X2+1,Y2);-+cleanSteaks(X2-1,Y2);-+cleanSteaks(X2-2,Y2);!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
+	.print("BORRANDO 5 EN HORIZONTAL");!putCt(X2,Y2)      ;-+cleanSteaks(X2+2,Y2);wait(3000);-+cleanSteaks(X2+1,Y2);wait(3000);-+cleanSteaks(X2-1,Y2);wait(3000);-+cleanSteaks(X2-2,Y2);
+															+moveDown(X2+2,Y2);+moveDown(X2+1,Y2);+moveDown(X2-2,Y2);+moveDown(X2-1,Y2);+moveDown(X2-2,Y2);
+															!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
 	
 	+detectGroups5B(X2,Y2,C) : 	groupColumn5(X2,Y2,C)  <-
 	
-	.print("BORRANDO 5 EN VERTICAL");!putCt(X2,Y2)    ;-+cleanSteaks(X2,Y2-2);
-	-+cleanSteaks(X2,Y2-1);
-	-+cleanSteaks(X2,Y2+1);-+cleanSteaks(X2,Y2+2);!colaterales(X2,Y2+2);+borrado.
+	.print("BORRANDO 5 EN VERTICAL");!putCt(X2,Y2)    ;-+cleanSteaks(X2,Y2-2);wait(3000);
+	-+cleanSteaks(X2,Y2-1);wait(3000);
+	-+cleanSteaks(X2,Y2+1);wait(3000);-+cleanSteaks(X2,Y2+2);
+	+moveDown(X2,Y2-2);+moveDown(X2,Y2+1);+moveDown(X2,Y2+2);+moveDown(X2,Y2-2);
+	!colaterales(X2,Y2+2);+borrado.
 	
 	
 	
@@ -398,78 +439,99 @@ groupFileA(X,Y,C) :- // OO_
 	//Hueco arriba der
 	+detectGroupsCuadrA(X2,Y2,C) : 	groupCuadradoA(X2,Y2,C)  <-
 	
-	.print("BORRANDO CUADRADO");!putGs(X2-1,Y2+1)  ;-+cleanSteaks(X2,Y2);
+	.print("BORRANDO CUADRADO");!putGs(X2-1,Y2+1)  ;-+cleanSteaks(X2,Y2);wait(3000);
 	
-	-+cleanSteaks(X2,Y2+1);-+cleanSteaks(X2-1,Y2);!colaterales(X2-1,Y2);!colaterales(X2,Y2+1);+borrado.
+	-+cleanSteaks(X2,Y2+1);wait(3000);-+cleanSteaks(X2-1,Y2);
+	+moveDown(X2,Y2+1);+moveDown(X2,Y2);+moveDown(X2-1,Y2);
+	!colaterales(X2-1,Y2);!colaterales(X2,Y2+1);+borrado.
 
 	//Hueco arriba izq
 	+detectGroupsCuadrB(X2,Y2,C):	groupCuadradoB(X2,Y2,C) <-
 
 	.print("BORRANDO CUADRADO");!putGs(X2,Y2+1)  ;
-	-+cleanSteaks(X2+1,Y2);
-	-+cleanSteaks(X2+1,Y2+1);-+cleanSteaks(X2,Y2);!colaterales(X2,Y2);!colaterales(X2,Y2+1);+borrado.
+	-+cleanSteaks(X2+1,Y2);wait(3000);
+	-+cleanSteaks(X2+1,Y2+1);wait(3000);-+cleanSteaks(X2,Y2);
+	+moveDown(X2+1,Y2);+moveDown(X2+1,Y2+1);+moveDown(X2,Y2);
+	!colaterales(X2,Y2);!colaterales(X2,Y2+1);+borrado.
 
 	//Hueco abajo izq 
 	+detectGroupsCuadrC(X2,Y2,C):	groupCuadradoC(X2,Y2) <-
 
 	.print("BORRANDO CUADRADO");!putGs(X2,Y2,C)  ;
 	
-	-+cleanSteaks(X2+1,Y2-1);
-	-+cleanSteaks(X2+1,Y2);-+cleanSteaks(X2,Y2-1);!colaterales(X2,Y2);!colaterales(X2+1,Y2);+borrado.
+	-+cleanSteaks(X2+1,Y2-1);wait(3000);
+	-+cleanSteaks(X2+1,Y2);wait(3000);-+cleanSteaks(X2,Y2-1);
+	+moveDown(X2+1,Y2-1);+moveDown(X2+1,Y2);+moveDown(X2,Y2-1);
+	!colaterales(X2,Y2);!colaterales(X2+1,Y2);+borrado.
 
 	//Hueco abajo der
 	+detectGroupsCuadrD(X2,Y2,C):	groupCuadradoD(X2,Y2,C) <-
 
-	.print("BORRANDO CUADRADO");!putGs(X2-1,Y2);  -+cleanSteaks(X2,Y2-1);-+cleanSteaks(X2,Y2);	-+cleanSteaks(X2-1,Y2-1); !colaterales(X2,Y2);!colaterales(X2-1,Y2);
+	.print("BORRANDO CUADRADO");!putGs(X2-1,Y2);  -+cleanSteaks(X2,Y2-1);wait(3000);-+cleanSteaks(X2,Y2);wait(3000);-+cleanSteaks(X2-1,Y2-1);
+												+moveDown(X2,Y2-1);+moveDown(X2,Y2);+moveDown(X2-1,Y2-1);
+												!colaterales(X2,Y2);!colaterales(X2-1,Y2);
 
 	+borrado.
 	
 		//Grupos T
 	+detectGroupsT(X2,Y2,C) : 	groupT(X2,Y2,C)  <-
 	
-	.print("BORRANDO T 0º");!putCo(X2,Y2)   ;-+cleanSteaks(X2+1,Y2);
-	-+cleanSteaks(X2-1,Y2); -+cleanSteaks(X2,Y2+1);-+cleanSteaks(X2,Y2+2);
+	.print("BORRANDO T 0º");!putCo(X2,Y2)   ;-+cleanSteaks(X2+1,Y2);wait(3000);
+	-+cleanSteaks(X2-1,Y2);wait(3000); -+cleanSteaks(X2,Y2+1);wait(3000);-+cleanSteaks(X2,Y2+2);
+	+moveDown(X2+1,Y2);+moveDown(X2-1,Y2);+moveDown(X2,Y2+1);+moveDown(X2,Y2+2);
 	!colaterales(X2+1,Y2);!colaterales(X2,Y2+2);!colaterales(X2-1,Y2);+borrado.
 	
 	+detectGroupsT2(X2,Y2,C) : 	groupT2(X2,Y2)  <-
 	
-	.print("BORRANDO T 180º");!putCo(X2,Y2)    ;-+cleanSteaks(X2+1,Y2);
-	-+cleanSteaks(X2,Y2-2);
-	-+cleanSteaks(X2,Y2-1);-+cleanSteaks(X2-1,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);+borrado.
+	.print("BORRANDO T 180º");!putCo(X2,Y2)    ;-+cleanSteaks(X2+1,Y2);wait(3000);
+	-+cleanSteaks(X2,Y2-2);wait(3000);
+	-+cleanSteaks(X2,Y2-1);wait(3000);-+cleanSteaks(X2-1,Y2);
+	+moveDown(X2+1,Y2);+moveDown(X2,Y2-2);+moveDown(X2,Y2-1);+moveDown(X2-1,Y2);
+	!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);+borrado.
 	
 	+detectGroupsT3(X2,Y2,C) : 	groupT3(X2,Y2,C)  <-
 	
-	.print("BORRANDO T 90º");!putCo(X2,Y2);  -+cleanSteaks(X2,Y2-1)  ;-+cleanSteaks(X2,Y2+1);
+	.print("BORRANDO T 90º");!putCo(X2,Y2);  -+cleanSteaks(X2,Y2-1);wait(3000);-+cleanSteaks(X2,Y2+1);wait(3000);
 	
-	-+cleanSteaks(X2-1,Y2);-+cleanSteaks(X2-2,Y2);!colaterales(X2,Y2+1);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
+	-+cleanSteaks(X2-1,Y2);wait(3000);-+cleanSteaks(X2-2,Y2);
+	+moveDown(X2,Y2-1);+moveDown(X2,Y2+1);+moveDown(X2-1,Y2);+moveDown(X2-2,Y2);
+	!colaterales(X2,Y2+1);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
 	
 	+detectGroupsT4(X2,Y2,C) : 	groupT4(X2,Y2,C)  <-
 	
-	.print("BORRANDO T 270º");!putCo(X2,Y2)   ;	-+cleanSteaks(X2+2,Y2);-+cleanSteaks(X2+1,Y2);
+	.print("BORRANDO T 270º");!putCo(X2,Y2)   ;	-+cleanSteaks(X2+2,Y2);wait(3000);-+cleanSteaks(X2+1,Y2);wait(3000);
 
-	-+cleanSteaks(X2,Y2-1);-+cleanSteaks(X2,Y2+1);!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2+1);+borrado.
+	-+cleanSteaks(X2,Y2-1);wait(3000);-+cleanSteaks(X2,Y2+1);
+	+moveDown(X2+2,Y2);+moveDown(X2+1,Y2);+moveDown(X2,Y2-1);+moveDown(X2,Y2+1);
+	!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2+1);+borrado.
 	
 	
 		//Grupos de 4
 	+detectGroups4A(X2,Y2,C) : 	groupFile4A(X2,Y2,C)  <-
 	
-	.print("BORRANDO 4 EN HORIZONTAL");!putIp(X2-2,Y2) ;-+cleanSteaks(X2+1,Y2)  ;-+cleanSteaks(X2,Y2);-+cleanSteaks(X2-1,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
+	.print("BORRANDO 4 EN HORIZONTAL");!putIp(X2-2,Y2) ;-+cleanSteaks(X2+1,Y2);wait(3000);-+cleanSteaks(X2,Y2);wait(3000);-+cleanSteaks(X2-1,Y2);
+	+moveDown(X2-2,Y2);+moveDown(X2+1,Y2);+moveDown(X2,Y2);+moveDown(X2-1,Y2);
+	!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
 
 +detectGroups4B(X2,Y2,C) : 	groupFile4B(X2,Y2,C)  <-
 	
-	.print("BORRANDO 4 EN HORIZONTAL");!putIp(X2+2,Y2)  ;-+cleanSteaks(X2+1,Y2) ;-+cleanSteaks(X2,Y2);-+cleanSteaks(X2-1,Y2);!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);+borrado.
+	.print("BORRANDO 4 EN HORIZONTAL");!putIp(X2+2,Y2)  ;-+cleanSteaks(X2+1,Y2) ;wait(3000);-+cleanSteaks(X2,Y2);wait(3000);-+cleanSteaks(X2-1,Y2);
+														+moveDown(X2+1,Y2);+moveDown(X2,Y2);+moveDown(X2-1,Y2);
+														!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);+borrado.
 	
 	
 	+detectGroups4C(X2,Y2,C) : 	groupColumn4C(X2,Y2,C)  <-
 	
-	.print("BORRANDO 4 EN VERTICAL");!putIp(X2,Y2+2);   -+cleanSteaks(X2,Y2-1)  ;-+cleanSteaks(X2,Y2);
+	.print("BORRANDO 4 EN VERTICAL");!putIp(X2,Y2+2);   -+cleanSteaks(X2,Y2-1)  ;wait(3000);-+cleanSteaks(X2,Y2);wait(3000);
 	-+cleanSteaks(X2,Y2+1);
+	+moveDown(X2,Y2+1);+moveDown(X2,Y2+2);+moveDown(X2,Y2-1);+moveDown(X2,Y2);
 	!colaterales(X2,Y2+2);+borrado.
 
 +detectGroups4D(X2,Y2,C) : 	groupColumn4D(X2,Y2,C)  <-
 	
-	.print("BORRANDO 4 EN VERTICAL");!putIp(X2,Y2-2);   -+cleanSteaks(X2,Y2-1)  ;-+cleanSteaks(X2,Y2);
+	.print("BORRANDO 4 EN VERTICAL");!putIp(X2,Y2-2);   -+cleanSteaks(X2,Y2-1); wait(3000);-+cleanSteaks(X2,Y2);wait(3000);
 	-+cleanSteaks(X2,Y2+1);
+	+moveDown(X2,Y2-2);+moveDown(X2,Y2-1);+moveDown(X2,Y2);
 	!colaterales(X2,Y2+1);+borrado.
 	
 	
@@ -477,28 +539,40 @@ groupFileA(X,Y,C) :- // OO_
 	//Grupos de 3
 +detectGroupsA(X2,Y2,C) : 	groupFileA(X2,Y2,C)  <-
 	
-	.print("BORRANDO EN HORIZONTAL");-+cleanSteaks(X2,Y2);-+cleanSteaks(X2-1,Y2);-+cleanSteaks(X2-2,Y2);!colaterales(X2,Y2);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
+	.print("BORRANDO EN HORIZONTAL");-+cleanSteaks(X2,Y2);wait(3000);-+cleanSteaks(X2-1,Y2);wait(3000);-+cleanSteaks(X2-2,Y2);
+									+moveDown(X2,Y2);+moveDown(X2-1,Y2);+moveDown(X2-2,Y2);
+									!colaterales(X2,Y2);!colaterales(X2-1,Y2);!colaterales(X2-2,Y2);+borrado.
 
 +detectGroupsB(X2,Y2,C) : 	groupFileB(X2,Y2,C)  <-
 	
-	.print("BORRANDO EN HORIZONTAL");-+cleanSteaks(X2+2,Y2);-+cleanSteaks(X2+1,Y2);-+cleanSteaks(X2,Y2);!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);+borrado.
+	.print("BORRANDO EN HORIZONTAL");-+cleanSteaks(X2+2,Y2);wait(3000);-+cleanSteaks(X2+1,Y2);wait(3000);-+cleanSteaks(X2,Y2);
+									+moveDown(X2+2,Y2);+moveDown(X2+1,Y2);+moveDown(X2,Y2);
+									!colaterales(X2+2,Y2);!colaterales(X2+1,Y2);!colaterales(X2,Y2);+borrado.
 
 +detectGroupsC(X2,Y2,C) : 	groupColumnC(X2,Y2,C)  <-
 	
-	.print("BORRANDO EN VERTICAL");-+cleanSteaks(X2,Y2-2);-+cleanSteaks(X2,Y2-1);-+cleanSteaks(X2,Y2);!colaterales(X2,Y2);+borrado.
+	.print("BORRANDO EN VERTICAL");-+cleanSteaks(X2,Y2-2);wait(3000);-+cleanSteaks(X2,Y2-1);wait(3000);-+cleanSteaks(X2,Y2);
+									+moveDown(X2,Y2-2);+moveDown(X2,Y2-1);+moveDown(X2,Y2);
+									!colaterales(X2,Y2);+borrado.
 
 
 +detectGroupsD(X2,Y2,C) : 	groupColumnD(X2,Y2,C)  <-
 	
-	.print("BORRANDO EN VERTICAL");-+cleanSteaks(X2,Y2);-+cleanSteaks(X2,Y2+1);-+cleanSteaks(X2,Y2+2);!colaterales(X2,Y2+2);+borrado.
+	.print("BORRANDO EN VERTICAL");-+cleanSteaks(X2,Y2);wait(3000);-+cleanSteaks(X2,Y2+1);wait(3000);-+cleanSteaks(X2,Y2+2);
+									+moveDown(X2,Y2);+moveDown(X2,Y2+1);+moveDown(X2,Y2+2);
+									!colaterales(X2,Y2+2);+borrado.
 
 +detectGroupsE(X2,Y2,C) : 	groupFileE(X2,Y2,C)  <-
 	
-	.print("BORRANDO EN HORIZONTAL");-+cleanSteaks(X2-1,Y2);-+cleanSteaks(X2,Y2);-+cleanSteaks(X2+1,Y2);!colaterales(X2-1,Y2);!colaterales(X2,Y2);!colaterales(X2+1,Y2);+borrado.
+	.print("BORRANDO EN HORIZONTAL");-+cleanSteaks(X2-1,Y2);wait(3000);-+cleanSteaks(X2,Y2);wait(3000);-+cleanSteaks(X2+1,Y2);
+									+moveDown(X2-1,Y2);+moveDown(X2,Y2);+moveDown(X2+1,Y2);
+									!colaterales(X2-1,Y2);!colaterales(X2,Y2);!colaterales(X2+1,Y2);+borrado.
 
 +detectGroupsF(X2,Y2,C) : 	groupColumnF(X2,Y2,C)  <-
 	
-	.print("BORRANDO EN VERTICAL");-+cleanSteaks(X2,Y2-1);-+cleanSteaks(X2,Y2);-+cleanSteaks(X2,Y2+1);!colaterales(X2,Y2+1);+borrado.
+	.print("BORRANDO EN VERTICAL");-+cleanSteaks(X2,Y2-1);wait(3000);-+cleanSteaks(X2,Y2);wait(3000);-+cleanSteaks(X2,Y2+1);
+									+moveDown(X2,Y2-1);+moveDown(X2,Y2);+moveDown(X2,Y2+1);
+									!colaterales(X2,Y2+1);+borrado.
 
 	
 	
@@ -562,26 +636,23 @@ groupFileA(X,Y,C) :- // OO_
 				.print("est� cayendo la columna: ", X);
 				
 				 ?steak(Q,X,Y-1);
-			
-				  
-				  
-				  
+
 				 deleteSteak(Q,X,Y-1);
 				 put(X,Y,Q,0);
 				 if(ct(X,Y-1,Q)){ //mantenemos las especiales
-				  -ct(X,Y-1,Q)
+				  -ct(X,Y-1,Q);
 				  !putCt(X,Y); 
 				  }
 				  if(ip(X,Y-1,Q)){
-				  -ip(X,Y-1,Q)
+				  -ip(X,Y-1,Q);
 				  !putIp(X,Y); 
 				  }
 				  if(gs(X,Y-1,Q)){
-				  -gs(X,Y-1,Q)
+				  -gs(X,Y-1,Q);
 				  !putGs(X,Y); 
 				  }
 				  if(co(X,Y-1,Q)){
-				  -co(X,Y-1,Q)
+				  -co(X,Y-1,Q);
 				  !putCo(X,Y); 
 				  }
 				 
@@ -628,13 +699,18 @@ groupFileA(X,Y,C) :- // OO_
 	 else{
 	.print("He borrado un steak(+1)");
 	 -+pointOnMov(1);!actualize;}
-	 }}};deleteSteak(C,X,Y);
-	+moveDown(X,Y).
+	 }}};deleteSteak(C,X,Y).
+	//+moveDown(X,Y).
 	
 +cleanSteaks(C,X,Y) <- .print("No hay steak para borrar").
 +trampa(Ag) <- 
 	.kill_agent(Ag);
 	.print("He tenido que matar el agente", Ag, " por tramposo."). // Elimina al tramposo reiterado
+	
++newLevel <-  +cleanTablero;
+			  -+totalPoints(0);
+			  -+movs(20);
+			  !start.
 	
 +exchange(X1,Y1,X2,Y2)[source(Source)]: //realiza el intercambio entre dos fichas
 	steak(C1,X1,Y1) & steak(C2,X2,Y2) & contiguas(X1,X2,Y1,Y2) & not C1 == C2 & not(obstacle(X1,Y1)) & not (obstacle(X2,Y2)) & ( not (freeGroup(X1,Y1,C2)) | not (freeGroup(X2,Y2,C1))  )
